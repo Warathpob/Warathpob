@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #chatWindow {
+            flex: 1;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        #chatForm {
+            display: flex;
+        }
+
+        #chatInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #sendButton {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #sendButton:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chatting Room</h1>
+        <div id="chatWindow"></div>
+        <form id="chatForm">
+            <input type="text" id="chatInput" placeholder="Type a message..." required>
+            <button type="submit" id="sendButton">Send</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
+        import { getDatabase, ref, onChildAdded, push } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCc7OxDVOH4U-4D1NC8UEVBRPOuu5mRMfo",
+            authDomain: "warathpob-webchat.firebaseapp.com",
+            projectId: "warathpob-webchat",
+            storageBucket: "warathpob-webchat.appspot.com",
+            messagingSenderId: "713480199695",
+            appId: "1:713480199695:web:2f1b67383611c668338d7a",
+            measurementId: "G-RZFMG302N3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        const chatWindow = document.getElementById('chatWindow');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+
+        const username = localStorage.getItem('username');
+        if (!username) {
+            window.location.href = 'index.html';
+        }
+
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (message) {
+                push(ref(database, 'messages'), {
+                    username: username,
+                    message: message,
+                    timestamp: Date.now()
+                });
+                chatInput.value = '';
+            }
+        });
+
+        onChildAdded(ref(database, 'messages'), (snapshot) => {
+            const data = snapshot.val();
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${data.username}: ${data.message}`;
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        });
+    </script>
+</body>
+</html>

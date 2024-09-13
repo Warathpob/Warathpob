@@ -3,115 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
+    <title>Login</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #login, #welcome {
-            margin-bottom: 20px;
-        }
-
-        #chatRoom {
-            margin-top: 20px;
-        }
-
-        #chatWindow {
-            border: 1px solid #ccc;
-            height: 300px;
-            overflow-y: scroll;
-            padding: 10px;
-            background: #f9f9f9;
-            margin-bottom: 10px;
-            border-radius: 4px;
-        }
-
-        #chatForm {
+            background-color: #f0f4f8;
             display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
 
-        #chatInput {
-            flex: 1;
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
             padding: 10px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
 
-        #sendButton {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            background: #007bff;
+        button {
+            background-color: #007bff;
             color: white;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        #sendButton:hover {
-            background: #0056b3;
-        }
-
-        #chatButton {
-            padding: 10px 15px;
             border: none;
+            padding: 10px 15px;
             border-radius: 4px;
-            background: #28a745;
-            color: white;
             cursor: pointer;
+            font-size: 16px;
         }
 
-        #chatButton:hover {
-            background: #218838;
-        }
-
-        #loginError {
-            color: red;
-            margin-top: 10px;
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="login" class="login">
-            <h2>Login</h2>
-            <form id="loginForm">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-                <button type="submit">Login</button>
-                <div id="loginError" class="hidden">
-                    <p>Incorrect username. Please try again.</p>
-                </div>
-            </form>
-        </div>
-
-        <div id="welcome" class="hidden">
-            <h1>Hello, <span id="userName"></span>!</h1>
-            <button id="logoutButton">Logout</button>
-            <button id="chatButton" class="hidden">Chatting Room</button>
-            <div id="chatRoom" class="hidden">
-                <h2>Chatting Room</h2>
-                <div id="chatWindow"></div>
-                <form id="chatForm">
-                    <input type="text" id="chatInput" placeholder="Type a message..." required>
-                    <button type="submit" id="sendButton">Send</button>
-                </form>
-            </div>
-        </div>
+        <h1>Welcome</h1>
+        <form id="loginForm">
+            <label for="username">Enter your name:</label>
+            <input type="text" id="username" name="username" required>
+            <button type="submit">Enter Chat</button>
+        </form>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCc7OxDVOH4U-4D1NC8UEVBRPOuu5mRMfo",
             authDomain: "warathpob-webchat.firebaseapp.com",
@@ -122,90 +82,16 @@
             measurementId: "G-RZFMG302N3"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('loginForm');
-            const loginError = document.getElementById('loginError');
-            const welcomeDiv = document.getElementById('welcome');
-            const loginDiv = document.getElementById('login');
-            const userNameSpan = document.getElementById('userName');
-            const logoutButton = document.getElementById('logoutButton');
-            const chatRoom = document.getElementById('chatRoom');
-            const chatWindow = document.getElementById('chatWindow');
-            const chatForm = document.getElementById('chatForm');
-            const chatInput = document.getElementById('chatInput');
-            const chatButton = document.getElementById('chatButton');
-
-            // Check if user is already logged in
-            if (localStorage.getItem('username')) {
-                showWelcomePage(localStorage.getItem('username'));
-            } else {
-                loginDiv.classList.remove('hidden');
-                welcomeDiv.classList.add('hidden');
-                chatRoom.classList.add('hidden');
-            }
-
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const username = document.getElementById('username').value.trim();
-
-                if (username) {
-                    localStorage.setItem('username', username);
-                    showWelcomePage(username);
-                } else {
-                    loginError.classList.remove('hidden');
-                }
-            });
-
-            logoutButton.addEventListener('click', () => {
-                localStorage.removeItem('username');
-                loginDiv.classList.remove('hidden');
-                welcomeDiv.classList.add('hidden');
-                chatRoom.classList.add('hidden');
-                chatButton.classList.add('hidden');
-            });
-
-            chatButton.addEventListener('click', () => {
-                chatRoom.classList.toggle('hidden');
-                chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to bottom
-            });
-
-            chatForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const message = chatInput.value.trim();
-                const username = localStorage.getItem('username');
-
-                if (message && username) {
-                    const newMessageRef = ref(database, 'messages/' + Date.now());
-                    set(newMessageRef, {
-                        username: username,
-                        message: message
-                    });
-                    chatInput.value = '';
-                }
-            });
-
-            function showWelcomePage(username) {
-                loginDiv.classList.add('hidden');
-                welcomeDiv.classList.remove('hidden');
-                chatButton.classList.remove('hidden');
-                userNameSpan.textContent = username;
-
-                const messagesRef = ref(database, 'messages');
-                onValue(messagesRef, (snapshot) => {
-                    chatWindow.innerHTML = ''; // Clear chat window
-                    snapshot.forEach((childSnapshot) => {
-                        const data = childSnapshot.val();
-                        const messageElement = document.createElement('div');
-                        messageElement.textContent = `${data.username}: ${data.message}`;
-                        chatWindow.appendChild(messageElement);
-                    });
-                    chatWindow.scrollTop = chatWindow.scrollHeight; // Scroll to bottom
-                });
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            if (username) {
+                localStorage.setItem('username', username);
+                window.location.href = 'chat.html';
             }
         });
     </script>
