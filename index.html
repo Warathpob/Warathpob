@@ -6,6 +6,14 @@
     <title>My Website</title>
 </head>
 <body>
-    <h1>Hello!</h1>
+    <h1>Hello, <span id="username">Guest</span>!</h1>
+    <script>
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('username').textContent = username;
+        } else {
+            window.location.href = 'login.html';
+        }
+    </script>
 </body>
 </html>
