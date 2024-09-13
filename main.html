@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Main Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,12 +17,6 @@
         .container {
             text-align: center;
         }
-        input {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
         button {
             padding: 10px 20px;
             border: none;
@@ -30,6 +24,7 @@
             background-color: #007bff;
             color: white;
             cursor: pointer;
+            margin: 10px;
         }
         button:hover {
             background-color: #0056b3;
@@ -38,16 +33,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>Enter Your Name</h1>
-        <input type="text" id="username" placeholder="Enter your name" required>
-        <button id="loginButton">Login</button>
-        <div id="error" style="color: red; margin-top: 10px;"></div>
+        <h1>Welcome, <span id="username"></span>!</h1>
+        <button id="liveChatButton">Live Chat</button>
+        <button id="logoutButton">Log Out</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -65,14 +59,21 @@
         const database = getDatabase(app);
         const analytics = getAnalytics(app);
 
-        document.getElementById('loginButton').addEventListener('click', () => {
-            const username = document.getElementById('username').value.trim();
-            if (username) {
-                localStorage.setItem('username', username);
-                window.location.href = 'main.html';
-            } else {
-                document.getElementById('error').textContent = 'Please enter your name.';
-            }
+        // Set username in main page
+        const username = localStorage.getItem('username');
+        if (username) {
+            document.getElementById('username').textContent = username;
+        } else {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        });
+
+        document.getElementById('liveChatButton').addEventListener('click', () => {
+            window.location.href = 'chat.html';
         });
     </script>
 </body>
