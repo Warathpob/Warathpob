@@ -33,7 +33,8 @@
             overflow-y: auto;
             border-bottom: 1px solid #ccc;
             padding: 10px;
-            background-color: #f9f9f9;
+            background-color: #ffffff;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); /* Added shadow for visibility */
         }
         #chatForm {
             display: flex;
@@ -125,14 +126,8 @@
                     username: username,
                     message: message,
                     timestamp: Date.now()
-                })
-                .then(() => {
-                    console.log('Message sent:', message);
-                    chatInput.value = '';
-                })
-                .catch((error) => {
-                    console.error('Error sending message:', error);
                 });
+                chatInput.value = '';
             }
         });
 
@@ -147,8 +142,6 @@
                 chatWindow.appendChild(messageElement);
             });
             chatWindow.scrollTop = chatWindow.scrollHeight;
-        }, (error) => {
-            console.error('Error reading messages:', error);
         });
 
         // Handle logout
