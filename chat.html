@@ -25,6 +25,7 @@
             border-radius: 4px;
             background: white;
             padding: 10px;
+            position: relative;
         }
         #chatWindow {
             flex: 1;
@@ -54,28 +55,30 @@
         #sendButton:hover {
             background: #0056b3;
         }
-        button {
-            padding: 10px 20px;
+        #logoutButton {
+            padding: 5px 10px;
             border: none;
             border-radius: 4px;
             background-color: #007bff;
             color: white;
             cursor: pointer;
-            margin-top: 10px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
         }
-        button:hover {
+        #logoutButton:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <button id="logoutButton">Log Out</button>
         <div id="chatWindow"></div>
         <form id="chatForm">
             <input type="text" id="chatInput" placeholder="Type a message..." required>
             <button type="submit" id="sendButton">Send</button>
         </form>
-        <button id="logoutButton">Log Out</button>
     </div>
 
     <script type="module">
