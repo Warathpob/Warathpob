@@ -33,7 +33,7 @@
             overflow-y: auto;
             border-bottom: 1px solid #ccc;
             padding: 10px;
-            background: #f9f9f9;
+            background-color: #f9f9f9;
         }
         #chatForm {
             display: flex;
@@ -86,7 +86,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
         
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -125,24 +125,22 @@
                     username: username,
                     message: message,
                     timestamp: Date.now()
-                }).then(() => {
-                    chatInput.value = '';
-                }).catch(error => {
-                    console.error('Error sending message: ', error);
                 });
+                chatInput.value = '';
             }
         });
 
         // Listen for new messages
         const messageRef = ref(database, 'messages');
-        onChildAdded(messageRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
+        onValue(messageRef, (snapshot) => {
+            chatWindow.innerHTML = ''; // Clear chat window
+            snapshot.forEach((childSnapshot) => {
+                const data = childSnapshot.val();
                 const messageElement = document.createElement('div');
                 messageElement.textContent = `${data.username}: ${data.message}`;
                 chatWindow.appendChild(messageElement);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            }
+            });
+            chatWindow.scrollTop = chatWindow.scrollHeight;
         });
 
         // Handle logout
