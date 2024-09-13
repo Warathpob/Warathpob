@@ -25,52 +25,20 @@
             margin-top: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             height: 100%;
         }
 
-        h1 {
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-
-        #chatControls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
         #chatWindow {
-            display: none;
-            width: 100%;
-            max-width: 100%;
+            flex: 1;
             border: 1px solid #ccc;
             background: #f9f9f9;
             padding: 10px;
             overflow-y: auto;
-            height: 300px;
-            border-radius: 4px;
             margin-bottom: 10px;
+            border-radius: 4px;
         }
 
         #chatForm {
-            display: none;
-            width: 100%;
-            max-width: 100%;
             display: flex;
         }
 
@@ -94,14 +62,33 @@
         #sendButton:hover {
             background: #0056b3;
         }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .button-container button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Chat Room</h1>
-        <div id="chatControls">
+        <div class="button-container">
             <button id="logoutButton">Logout</button>
-            <button id="showChatButton">Chatting Room</button>
+            <button id="chatRoomButton">Chatting Room</button>
         </div>
         <div id="chatWindow"></div>
         <form id="chatForm">
@@ -132,24 +119,12 @@
         const chatWindow = document.getElementById('chatWindow');
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
-        const showChatButton = document.getElementById('showChatButton');
         const logoutButton = document.getElementById('logoutButton');
 
         const username = localStorage.getItem('username');
         if (!username) {
             window.location.href = 'index.html';
         }
-
-        showChatButton.addEventListener('click', () => {
-            chatWindow.style.display = 'block';
-            chatForm.style.display = 'flex';
-            showChatButton.style.display = 'none';
-        });
-
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('username');
-            window.location.href = 'index.html';
-        });
 
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -170,6 +145,11 @@
             messageElement.textContent = `${data.username}: ${data.message}`;
             chatWindow.appendChild(messageElement);
             chatWindow.scrollTop = chatWindow.scrollHeight;
+        });
+
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
         });
     </script>
 </body>
