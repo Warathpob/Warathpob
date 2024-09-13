@@ -125,8 +125,14 @@
                     username: username,
                     message: message,
                     timestamp: Date.now()
+                })
+                .then(() => {
+                    console.log('Message sent:', message);
+                    chatInput.value = '';
+                })
+                .catch((error) => {
+                    console.error('Error sending message:', error);
                 });
-                chatInput.value = '';
             }
         });
 
@@ -141,6 +147,8 @@
                 chatWindow.appendChild(messageElement);
             });
             chatWindow.scrollTop = chatWindow.scrollHeight;
+        }, (error) => {
+            console.error('Error reading messages:', error);
         });
 
         // Handle logout
