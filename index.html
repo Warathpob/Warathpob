@@ -5,27 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Website</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .login { margin: 50px; }
-        .hidden { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .login, .welcome {
+            padding: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #007bff;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <div id="login" class="login">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            <button type="submit">Login</button>
-        </form>
-        <div id="loginError" class="hidden">
-            <p>Incorrect username. Please try again.</p>
+    <div class="container">
+        <div id="login" class="login">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <button type="submit">Login</button>
+                <div id="loginError" class="error hidden">
+                    <p>Incorrect username. Please try again.</p>
+                </div>
+            </form>
         </div>
-    </div>
 
-    <div id="welcome" class="hidden">
-        <h1>Hello, <span id="userName"></span>!</h1>
-        <button id="logoutButton">Logout</button>
+        <div id="welcome" class="welcome hidden">
+            <h1>Hello, <span id="userName"></span>!</h1>
+            <button id="logoutButton">Logout</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
