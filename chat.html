@@ -33,6 +33,7 @@
             overflow-y: auto;
             border-bottom: 1px solid #ccc;
             padding: 10px;
+            background: #f9f9f9;
         }
         #chatForm {
             display: flex;
@@ -124,8 +125,11 @@
                     username: username,
                     message: message,
                     timestamp: Date.now()
+                }).then(() => {
+                    chatInput.value = '';
+                }).catch(error => {
+                    console.error('Error sending message: ', error);
                 });
-                chatInput.value = '';
             }
         });
 
@@ -133,10 +137,12 @@
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
-            const messageElement = document.createElement('div');
-            messageElement.textContent = `${data.username}: ${data.message}`;
-            chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            if (data) {
+                const messageElement = document.createElement('div');
+                messageElement.textContent = `${data.username}: ${data.message}`;
+                chatWindow.appendChild(messageElement);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
         });
 
         // Handle logout
