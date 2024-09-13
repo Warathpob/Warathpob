@@ -77,10 +77,9 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, set, onChildAdded, off } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -98,7 +97,6 @@
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
 
-        // JavaScript code for login and chat functionality
         document.addEventListener('DOMContentLoaded', () => {
             const loginForm = document.getElementById('loginForm');
             const loginError = document.getElementById('loginError');
@@ -122,7 +120,7 @@
 
             loginForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const username = document.getElementById('username').value;
+                const username = document.getElementById('username').value.trim();
 
                 if (username) {
                     localStorage.setItem('username', username);
@@ -137,6 +135,7 @@
                 loginDiv.classList.remove('hidden');
                 welcomeDiv.classList.add('hidden');
                 chatRoom.classList.add('hidden');
+                chatWindow.innerHTML = ''; // Clear chat window on logout
             });
 
             chatForm.addEventListener('submit', (e) => {
@@ -161,12 +160,23 @@
                 userNameSpan.textContent = username;
 
                 const messagesRef = ref(database, 'messages');
-                onChildAdded(messagesRef, (snapshot) => {
+                // Clear previous messages
+                chatWindow.innerHTML = '';
+
+                // Set up listener for new messages
+                const handleNewMessage = (snapshot) => {
                     const data = snapshot.val();
                     const messageElement = document.createElement('div');
                     messageElement.textContent = `${data.username}: ${data.message}`;
                     chatWindow.appendChild(messageElement);
                     chatWindow.scrollTop = chatWindow.scrollHeight;
+                };
+
+                onChildAdded(messagesRef, handleNewMessage);
+
+                // Remove the listener on logout or page refresh
+                window.addEventListener('beforeunload', () => {
+                    off(messagesRef, 'child_added', handleNewMessage);
                 });
             }
         });
