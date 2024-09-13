@@ -33,8 +33,6 @@
             overflow-y: auto;
             border-bottom: 1px solid #ccc;
             padding: 10px;
-            background-color: #ffffff;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); /* Added shadow for visibility */
         }
         #chatForm {
             display: flex;
@@ -134,7 +132,7 @@
         // Listen for new messages
         const messageRef = ref(database, 'messages');
         onValue(messageRef, (snapshot) => {
-            chatWindow.innerHTML = ''; // Clear chat window
+            chatWindow.innerHTML = ''; // Clear the chat window
             snapshot.forEach((childSnapshot) => {
                 const data = childSnapshot.val();
                 const messageElement = document.createElement('div');
