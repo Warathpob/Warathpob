@@ -4,15 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Website</title>
-    <script defer src="script.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .login { margin: 50px; }
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
-    <h1>Hello!</h1>
-    <form id="nameForm">
-        <label for="name">Enter your name:</label>
-        <input type="text" id="name" name="name" required>
-        <button type="submit">Submit</button>
-    </form>
-    <p id="greeting"></p>
+    <div id="login" class="login">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginError" class="hidden">
+            <p>Incorrect username. Please try again.</p>
+        </div>
+    </div>
+
+    <div id="welcome" class="hidden">
+        <h1>Hello, <span id="userName"></span>!</h1>
+        <button id="logoutButton">Logout</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
