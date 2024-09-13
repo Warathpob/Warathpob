@@ -85,6 +85,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
         import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
         
         // Your web app's Firebase configuration
@@ -101,6 +102,7 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const analytics = getAnalytics(app);
 
         const chatWindow = document.getElementById('chatWindow');
         const chatForm = document.getElementById('chatForm');
