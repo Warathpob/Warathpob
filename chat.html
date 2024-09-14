@@ -23,10 +23,11 @@
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 10px;
             background: white;
             padding: 10px;
             box-sizing: border-box;
+            overflow: hidden;
         }
         #chatWindow {
             flex: 1;
@@ -35,6 +36,38 @@
             padding: 10px;
             box-sizing: border-box;
             height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .message.own {
+            justify-content: flex-end;
+        }
+        .message.own .text {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 70%;
+            text-align: right;
+            display: inline-block;
+        }
+        .message.other .text {
+            background-color: #e9ecef;
+            color: #333;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 70%;
+            text-align: left;
+            display: inline-block;
+        }
+        .message .username {
+            font-size: 0.75em;
+            color: #666;
+            margin-bottom: 5px;
         }
         #chatForm {
             display: flex;
@@ -58,7 +91,7 @@
         #sendButton:hover {
             background: #0056b3;
         }
-        #logoutButton, #clearAllButton {
+        #logoutButton {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -69,35 +102,14 @@
             color: white;
             cursor: pointer;
             font-size: 0.8em;
-            margin-left: 5px;
         }
-        #logoutButton:hover, #clearAllButton:hover {
-            background-color: #d00000;
-        }
-        .message {
-            margin-bottom: 10px;
-        }
-        .message .username {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-        .message .content {
-            padding: 10px;
-            border-radius: 10px;
-            background-color: #e0e0e0;
-            display: inline-block;
-            max-width: 80%;
-        }
-        .message .own .content {
-            background-color: #007bff;
-            color: white;
-            text-align: right;
+        #logoutButton:hover {
+            background-color: #cc0000;
         }
     </style>
 </head>
 <body>
     <button id="logoutButton">Log Out</button>
-    <button id="clearAllButton">Clear All</button>
     <div class="container">
         <div id="chatWindow"></div>
         <form id="chatForm">
@@ -108,7 +120,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, remove, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -119,7 +131,7 @@
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
             measurementId: "G-RZFMG302N3",
-            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app" // Updated database URL
+            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
 
         // Initialize Firebase
@@ -130,7 +142,6 @@
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
-        const clearAllButton = document.getElementById('clearAllButton');
 
         // Check if user is logged in
         const username = localStorage.getItem('username');
@@ -160,29 +171,30 @@
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        displayMessage(data.username, data.message, data.username === username);
+                        const messageElement = document.createElement('div');
+                        messageElement.className = `message ${data.username === username ? 'own' : 'other'}`;
+                        messageElement.innerHTML = `
+                            <div class="username">${data.username}</div>
+                            <div class="text">${data.message}</div>
+                        `;
+                        chatWindow.appendChild(messageElement);
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
                 }
             });
         }
 
-        // Display a message in the chat window
-        function displayMessage(user, msg, isOwnMessage) {
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${isOwnMessage ? 'own' : ''}`;
-            messageElement.innerHTML = `
-                <div class="username">${user}</div>
-                <div class="content">${msg}</div>
-            `;
-            chatWindow.appendChild(messageElement);
-        }
-
         // Listen for new messages in real-time
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
-            displayMessage(data.username, data.message, data.username === username);
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${data.username === username ? 'own' : 'other'}`;
+            messageElement.innerHTML = `
+                <div class="username">${data.username}</div>
+                <div class="text">${data.message}</div>
+            `;
+            chatWindow.appendChild(messageElement);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
 
@@ -193,12 +205,6 @@
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('username');
             window.location.href = 'index.html';
-        });
-
-        // Handle clear all
-        clearAllButton.addEventListener('click', () => {
-            const messageRef = ref(database, 'messages');
-            remove(messageRef);
         });
     </script>
 </body>
