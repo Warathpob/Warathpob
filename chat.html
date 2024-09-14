@@ -23,51 +23,43 @@
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 10px;
+            border-radius: 8px;
             background: white;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
-            overflow: hidden;
         }
         #chatWindow {
             flex: 1;
             overflow-y: auto;
-            border-bottom: 1px solid #ccc;
             padding: 10px;
             box-sizing: border-box;
-            height: 100%;
             display: flex;
             flex-direction: column;
         }
         .message {
+            margin-bottom: 15px;
             display: flex;
-            margin-bottom: 10px;
+            align-items: flex-end;
         }
-        .message.own {
-            justify-content: flex-end;
+        .message.left {
+            flex-direction: row;
         }
-        .message.own .text {
-            background-color: #007bff;
-            color: white;
-            border-radius: 10px;
-            padding: 10px;
-            max-width: 70%;
-            text-align: right;
-            display: inline-block;
-        }
-        .message.other .text {
-            background-color: #e9ecef;
-            color: #333;
-            border-radius: 10px;
-            padding: 10px;
-            max-width: 70%;
-            text-align: left;
-            display: inline-block;
+        .message.right {
+            flex-direction: row-reverse;
         }
         .message .username {
-            font-size: 0.75em;
-            color: #666;
-            margin-bottom: 5px;
+            font-weight: bold;
+            margin: 0 10px;
+            color: #333;
+        }
+        .message .messageContent {
+            background: #e1f5fe;
+            padding: 10px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        .message.right .messageContent {
+            background: #c8e6c9;
         }
         #chatForm {
             display: flex;
@@ -104,7 +96,7 @@
             font-size: 0.8em;
         }
         #logoutButton:hover {
-            background-color: #cc0000;
+            background-color: #e60000;
         }
     </style>
 </head>
@@ -171,13 +163,7 @@
                 if (snapshot.exists()) {
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        const messageElement = document.createElement('div');
-                        messageElement.className = `message ${data.username === username ? 'own' : 'other'}`;
-                        messageElement.innerHTML = `
-                            <div class="username">${data.username}</div>
-                            <div class="text">${data.message}</div>
-                        `;
-                        chatWindow.appendChild(messageElement);
+                        displayMessage(data.username, data.message);
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
                 }
@@ -188,15 +174,28 @@
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${data.username === username ? 'own' : 'other'}`;
-            messageElement.innerHTML = `
-                <div class="username">${data.username}</div>
-                <div class="text">${data.message}</div>
-            `;
-            chatWindow.appendChild(messageElement);
+            displayMessage(data.username, data.message);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
+
+        // Function to display a message
+        function displayMessage(username, message) {
+            const messageElement = document.createElement('div');
+            const messageClass = username === localStorage.getItem('username') ? 'right' : 'left';
+            messageElement.classList.add('message', messageClass);
+
+            const usernameElement = document.createElement('div');
+            usernameElement.classList.add('username');
+            usernameElement.textContent = username;
+
+            const messageContentElement = document.createElement('div');
+            messageContentElement.classList.add('messageContent');
+            messageContentElement.textContent = message;
+
+            messageElement.appendChild(usernameElement);
+            messageElement.appendChild(messageContentElement);
+            chatWindow.appendChild(messageElement);
+        }
 
         // Load messages when page loads
         loadMessages();
