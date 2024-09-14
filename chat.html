@@ -23,11 +23,10 @@
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 10px;
+            border-radius: 8px;
             background: white;
             padding: 10px;
             box-sizing: border-box;
-            overflow: hidden;
         }
         #chatWindow {
             flex: 1;
@@ -36,38 +35,25 @@
             padding: 10px;
             box-sizing: border-box;
             height: 100%;
-            display: flex;
-            flex-direction: column;
         }
         .message {
             display: flex;
             margin-bottom: 10px;
-        }
-        .message.own {
-            justify-content: flex-end;
-        }
-        .message.own .text {
-            background-color: #007bff;
-            color: white;
-            border-radius: 10px;
-            padding: 10px;
-            max-width: 70%;
-            text-align: right;
-            display: inline-block;
-        }
-        .message.other .text {
+            padding: 5px;
+            border-radius: 8px;
             background-color: #e9ecef;
-            color: #333;
-            border-radius: 10px;
+            position: relative;
             padding: 10px;
-            max-width: 70%;
-            text-align: left;
-            display: inline-block;
         }
         .message .username {
-            font-size: 0.75em;
-            color: #666;
-            margin-bottom: 5px;
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .message .text {
+            margin-top: 20px;
         }
         #chatForm {
             display: flex;
@@ -91,24 +77,34 @@
         #sendButton:hover {
             background: #0056b3;
         }
-        #logoutButton {
+        #logoutButton, #clearButton {
             position: absolute;
             top: 10px;
-            right: 10px;
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
-            background-color: #ff0000;
             color: white;
             cursor: pointer;
             font-size: 0.8em;
         }
+        #logoutButton {
+            right: 60px;
+            background-color: #ff0000;
+        }
         #logoutButton:hover {
             background-color: #cc0000;
+        }
+        #clearButton {
+            right: 10px;
+            background-color: #dc3545;
+        }
+        #clearButton:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
+    <button id="clearButton">Clear All</button>
     <button id="logoutButton">Log Out</button>
     <div class="container">
         <div id="chatWindow"></div>
@@ -120,7 +116,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -131,7 +127,7 @@
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
             measurementId: "G-RZFMG302N3",
-            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app"
+            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app" // Updated database URL
         };
 
         // Initialize Firebase
@@ -142,6 +138,7 @@
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
+        const clearButton = document.getElementById('clearButton');
 
         // Check if user is logged in
         const username = localStorage.getItem('username');
@@ -172,11 +169,8 @@
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
                         const messageElement = document.createElement('div');
-                        messageElement.className = `message ${data.username === username ? 'own' : 'other'}`;
-                        messageElement.innerHTML = `
-                            <div class="username">${data.username}</div>
-                            <div class="text">${data.message}</div>
-                        `;
+                        messageElement.classList.add('message');
+                        messageElement.innerHTML = `<div class="username">${data.username}</div><div class="text">${data.message}</div>`;
                         chatWindow.appendChild(messageElement);
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
@@ -189,11 +183,8 @@
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
             const messageElement = document.createElement('div');
-            messageElement.className = `message ${data.username === username ? 'own' : 'other'}`;
-            messageElement.innerHTML = `
-                <div class="username">${data.username}</div>
-                <div class="text">${data.message}</div>
-            `;
+            messageElement.classList.add('message');
+            messageElement.innerHTML = `<div class="username">${data.username}</div><div class="text">${data.message}</div>`;
             chatWindow.appendChild(messageElement);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
@@ -205,6 +196,15 @@
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('username');
             window.location.href = 'index.html';
+        });
+
+        // Handle clear all messages
+        clearButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all messages?')) {
+                const messageRef = ref(database, 'messages');
+                remove(messageRef);
+                chatWindow.innerHTML = ''; // Clear chat window
+            }
         });
     </script>
 </body>
