@@ -18,12 +18,12 @@
         }
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 800px;
             display: flex;
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 8px;
             background: white;
             padding: 10px;
             box-sizing: border-box;
@@ -34,7 +34,6 @@
             border-bottom: 1px solid #ccc;
             padding: 10px;
             box-sizing: border-box;
-            height: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -42,22 +41,28 @@
         .message {
             display: flex;
             flex-direction: column;
-            padding: 5px;
+            max-width: 70%;
         }
-        .message .username {
-            font-weight: bold;
-            margin-bottom: 3px;
-            color: #007bff; /* Distinct color for usernames */
-        }
-        .message .text {
-            background-color: #e9ecef; /* Light background for messages */
+        .message.user {
+            align-self: flex-end;
+            background-color: #d1e7dd;
             padding: 10px;
-            border-radius: 5px;
-            max-width: 80%;
+            border-radius: 10px;
+        }
+        .message.other {
+            align-self: flex-start;
+            background-color: #e2e3e5;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .message span {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
         #chatForm {
             display: flex;
             margin-top: 10px;
+            gap: 10px;
         }
         #chatInput {
             flex: 1;
@@ -65,17 +70,22 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        #sendButton {
+        #sendButton, #clearButton {
             padding: 10px 15px;
             border: none;
             border-radius: 4px;
             background: #007bff;
             color: white;
             cursor: pointer;
-            margin-left: 10px;
         }
-        #sendButton:hover {
+        #sendButton:hover, #clearButton:hover {
             background: #0056b3;
+        }
+        #clearButton {
+            background: #dc3545;
+        }
+        #clearButton:hover {
+            background: #c82333;
         }
         #logoutButton {
             position: absolute;
@@ -90,18 +100,6 @@
             font-size: 0.8em;
         }
         #logoutButton:hover {
-            background-color: #c00;
-        }
-        #clearButton {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            background-color: #dc3545;
-            color: white;
-            cursor: pointer;
-            margin: 10px 0;
-        }
-        #clearButton:hover {
             background-color: #c82333;
         }
     </style>
@@ -109,17 +107,17 @@
 <body>
     <button id="logoutButton">Log Out</button>
     <div class="container">
-        <button id="clearButton">Clear All</button>
         <div id="chatWindow"></div>
         <form id="chatForm">
             <input type="text" id="chatInput" placeholder="Type a message..." required>
             <button type="submit" id="sendButton">Send</button>
+            <button type="button" id="clearButton">Clear All</button>
         </form>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, remove, set } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -172,11 +170,8 @@
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
                         const messageElement = document.createElement('div');
-                        messageElement.classList.add('message');
-                        messageElement.innerHTML = `
-                            <div class="username">${data.username}</div>
-                            <div class="text">${data.message}</div>
-                        `;
+                        messageElement.className = `message ${data.username === username ? 'user' : 'other'}`;
+                        messageElement.innerHTML = `<span>${data.username}</span>${data.message}`;
                         chatWindow.appendChild(messageElement);
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
@@ -189,11 +184,8 @@
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
             const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-            messageElement.innerHTML = `
-                <div class="username">${data.username}</div>
-                <div class="text">${data.message}</div>
-            `;
+            messageElement.className = `message ${data.username === username ? 'user' : 'other'}`;
+            messageElement.innerHTML = `<span>${data.username}</span>${data.message}`;
             chatWindow.appendChild(messageElement);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
@@ -210,12 +202,7 @@
         // Handle clear all messages
         clearButton.addEventListener('click', () => {
             const messageRef = ref(database, 'messages');
-            get(messageRef).then((snapshot) => {
-                snapshot.forEach((childSnapshot) => {
-                    remove(childSnapshot.ref);
-                });
-                chatWindow.innerHTML = ''; // Clear chat window
-            });
+            remove(messageRef);
         });
     </script>
 </body>
