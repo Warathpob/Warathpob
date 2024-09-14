@@ -34,6 +34,7 @@
             border-bottom: 1px solid #ccc;
             padding: 10px;
             box-sizing: border-box;
+            height: 100%;
         }
         #chatForm {
             display: flex;
@@ -86,10 +87,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
         
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCc7OxDVOH4U-4D1NC8UEVBRPOuu5mRMfo",
             authDomain: "warathpob-webchat.firebaseapp.com",
@@ -97,26 +97,26 @@
             storageBucket: "warathpob-webchat.appspot.com",
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
-            measurementId: "G-RZFMG302N3"
+            measurementId: "G-RZFMG302N3",
+            databaseURL: "https://warathpob-webchat-default-rtdb.firebaseio.com" // Add databaseURL here
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const analytics = getAnalytics(app);
 
         const chatWindow = document.getElementById('chatWindow');
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
 
-        // Check if user is logged in
+        // Get username from localStorage
         const username = localStorage.getItem('username');
         if (!username) {
             window.location.href = 'index.html';
         }
 
-        // Handle form submission
+        // Handle form submission to send message
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = chatInput.value.trim();
@@ -131,14 +131,14 @@
             }
         });
 
-        // Listen for new messages
+        // Listen for new messages in real-time
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
             const messageElement = document.createElement('div');
             messageElement.textContent = `${data.username}: ${data.message}`;
             chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
 
         // Handle logout
