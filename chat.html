@@ -88,8 +88,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-        
-        // Firebase configuration
+
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCc7OxDVOH4U-4D1NC8UEVBRPOuu5mRMfo",
             authDomain: "warathpob-webchat.firebaseapp.com",
@@ -98,7 +98,7 @@
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
             measurementId: "G-RZFMG302N3",
-            databaseURL: "https://warathpob-webchat-default-rtdb.firebaseio.com"
+            databaseURL: "https://warathpob-webchat-default-rtdb.firebaseio.com" // Ensure databaseURL is correct
         };
 
         // Initialize Firebase
@@ -110,7 +110,7 @@
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
 
-        // Get username from localStorage
+        // Check if user is logged in
         const username = localStorage.getItem('username');
         if (!username) {
             window.location.href = 'index.html';
