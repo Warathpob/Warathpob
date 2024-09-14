@@ -23,7 +23,7 @@
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 8px;
+            border-radius: 4px;
             background: white;
             padding: 10px;
             box-sizing: border-box;
@@ -37,33 +37,23 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            gap: 10px;
         }
         .message {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            max-width: 80%;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
         }
         .message .username {
             font-weight: bold;
+            margin-bottom: 3px;
+            color: #007bff; /* Distinct color for usernames */
         }
-        .message .timestamp {
-            font-size: 0.8em;
-            color: #666;
-            position: absolute;
-            right: 10px;
-            bottom: 5px;
-        }
-        .message.mine {
-            align-self: flex-end;
-            background-color: #007bff;
-            color: white;
-        }
-        .message.theirs {
-            align-self: flex-start;
-            background-color: #e0e0e0;
-            color: black;
+        .message .text {
+            background-color: #e9ecef; /* Light background for messages */
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
         }
         #chatForm {
             display: flex;
@@ -100,13 +90,26 @@
             font-size: 0.8em;
         }
         #logoutButton:hover {
-            background-color: #cc0000;
+            background-color: #c00;
+        }
+        #clearButton {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #dc3545;
+            color: white;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        #clearButton:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
     <button id="logoutButton">Log Out</button>
     <div class="container">
+        <button id="clearButton">Clear All</button>
         <div id="chatWindow"></div>
         <form id="chatForm">
             <input type="text" id="chatInput" placeholder="Type a message..." required>
@@ -116,7 +119,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -127,7 +130,7 @@
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
             measurementId: "G-RZFMG302N3",
-            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app" // Updated database URL
+            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
 
         // Initialize Firebase
@@ -138,6 +141,7 @@
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
+        const clearButton = document.getElementById('clearButton');
 
         // Check if user is logged in
         const username = localStorage.getItem('username');
@@ -154,7 +158,7 @@
                 push(messageRef, {
                     username: username,
                     message: message,
-                    timestamp: new Date().toLocaleTimeString()
+                    timestamp: Date.now()
                 });
                 chatInput.value = '';
             }
@@ -169,10 +173,9 @@
                         const data = childSnapshot.val();
                         const messageElement = document.createElement('div');
                         messageElement.classList.add('message');
-                        messageElement.classList.add(data.username === username ? 'mine' : 'theirs');
                         messageElement.innerHTML = `
-                            <span class="username">${data.username}</span>: ${data.message}
-                            <span class="timestamp">${data.timestamp}</span>
+                            <div class="username">${data.username}</div>
+                            <div class="text">${data.message}</div>
                         `;
                         chatWindow.appendChild(messageElement);
                     });
@@ -187,10 +190,9 @@
             const data = snapshot.val();
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
-            messageElement.classList.add(data.username === username ? 'mine' : 'theirs');
             messageElement.innerHTML = `
-                <span class="username">${data.username}</span>: ${data.message}
-                <span class="timestamp">${data.timestamp}</span>
+                <div class="username">${data.username}</div>
+                <div class="text">${data.message}</div>
             `;
             chatWindow.appendChild(messageElement);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
@@ -203,6 +205,17 @@
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('username');
             window.location.href = 'index.html';
+        });
+
+        // Handle clear all messages
+        clearButton.addEventListener('click', () => {
+            const messageRef = ref(database, 'messages');
+            get(messageRef).then((snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    remove(childSnapshot.ref);
+                });
+                chatWindow.innerHTML = ''; // Clear chat window
+            });
         });
     </script>
 </body>
