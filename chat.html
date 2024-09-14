@@ -87,7 +87,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -131,6 +131,22 @@
             }
         });
 
+        // Function to load existing messages
+        function loadMessages() {
+            const messageRef = ref(database, 'messages');
+            get(messageRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        const data = childSnapshot.val();
+                        const messageElement = document.createElement('div');
+                        messageElement.textContent = `${data.username}: ${data.message}`;
+                        chatWindow.appendChild(messageElement);
+                    });
+                    chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+                }
+            });
+        }
+
         // Listen for new messages in real-time
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
@@ -140,6 +156,9 @@
             chatWindow.appendChild(messageElement);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
+
+        // Load messages when page loads
+        loadMessages();
 
         // Handle logout
         logoutButton.addEventListener('click', () => {
