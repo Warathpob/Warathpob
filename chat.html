@@ -23,7 +23,7 @@
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 8px;
+            border-radius: 4px;
             background: white;
             padding: 10px;
             box-sizing: border-box;
@@ -31,25 +31,10 @@
         #chatWindow {
             flex: 1;
             overflow-y: auto;
+            border-bottom: 1px solid #ccc;
             padding: 10px;
             box-sizing: border-box;
-        }
-        .message {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
-        }
-        .message .username {
-            font-weight: bold;
-            color: #007bff;
-            margin-bottom: 2px;
-        }
-        .message .text {
-            background: #e9ecef;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 0;
-            word-break: break-word;
+            height: 100%;
         }
         #chatForm {
             display: flex;
@@ -80,21 +65,33 @@
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
+            background-color: #ff0000;
             color: white;
             cursor: pointer;
             font-size: 0.8em;
+            margin-left: 5px;
         }
-        #logoutButton {
-            background-color: #ff0000;
+        #logoutButton:hover, #clearAllButton:hover {
+            background-color: #d00000;
         }
-        #logoutButton:hover {
-            background-color: #cc0000;
+        .message {
+            margin-bottom: 10px;
         }
-        #clearAllButton {
-            background-color: #dc3545;
+        .message .username {
+            font-weight: bold;
+            margin-bottom: 2px;
         }
-        #clearAllButton:hover {
-            background-color: #c82333;
+        .message .content {
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #e0e0e0;
+            display: inline-block;
+            max-width: 80%;
+        }
+        .message .own .content {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
         }
     </style>
 </head>
@@ -122,7 +119,7 @@
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
             measurementId: "G-RZFMG302N3",
-            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app"
+            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app" // Updated database URL
         };
 
         // Initialize Firebase
@@ -161,39 +158,32 @@
             const messageRef = ref(database, 'messages');
             get(messageRef).then((snapshot) => {
                 if (snapshot.exists()) {
-                    chatWindow.innerHTML = ''; // Clear existing messages
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        displayMessage(data.username, data.message);
+                        displayMessage(data.username, data.message, data.username === username);
                     });
+                    chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
                 }
             });
         }
 
-        // Function to display a message
-        function displayMessage(user, message) {
+        // Display a message in the chat window
+        function displayMessage(user, msg, isOwnMessage) {
             const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-
-            const usernameElement = document.createElement('div');
-            usernameElement.classList.add('username');
-            usernameElement.textContent = user;
-
-            const textElement = document.createElement('div');
-            textElement.classList.add('text');
-            textElement.textContent = message;
-
-            messageElement.appendChild(usernameElement);
-            messageElement.appendChild(textElement);
+            messageElement.className = `message ${isOwnMessage ? 'own' : ''}`;
+            messageElement.innerHTML = `
+                <div class="username">${user}</div>
+                <div class="content">${msg}</div>
+            `;
             chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         }
 
         // Listen for new messages in real-time
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
-            displayMessage(data.username, data.message);
+            displayMessage(data.username, data.message, data.username === username);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
         });
 
         // Load messages when page loads
@@ -205,7 +195,7 @@
             window.location.href = 'index.html';
         });
 
-        // Handle clear all messages
+        // Handle clear all
         clearAllButton.addEventListener('click', () => {
             const messageRef = ref(database, 'messages');
             remove(messageRef);
