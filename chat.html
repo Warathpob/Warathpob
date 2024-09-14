@@ -6,9 +6,8 @@
     <title>Chat Room</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
@@ -23,41 +22,44 @@
             flex-direction: column;
             height: 80vh;
             border: 1px solid #ccc;
-            border-radius: 10px;
-            background: white;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            box-sizing: border-box;
         }
         #chatWindow {
             flex: 1;
             overflow-y: auto;
+            border-bottom: 1px solid #ccc;
             padding: 10px;
             box-sizing: border-box;
             height: 100%;
         }
         .message {
             margin-bottom: 15px;
-            max-width: 80%;
-            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+            max-width: 70%;
         }
-        .message.other {
-            text-align: left;
-            background-color: #e6e6e6;
-            border-radius: 15px 15px 15px 0;
-            padding: 10px;
-        }
-        .message.self {
-            text-align: right;
+        .message.user {
+            align-self: flex-end;
             background-color: #007bff;
             color: white;
-            border-radius: 15px 15px 0 15px;
+            border-radius: 10px 10px 0 10px;
             padding: 10px;
-            margin-left: auto;
         }
-        .username {
-            font-size: 0.85em;
-            color: #666;
+        .message.other {
+            align-self: flex-start;
+            background-color: #f1f1f1;
+            color: black;
+            border-radius: 10px 10px 10px 0;
+            padding: 10px;
+        }
+        .message-label {
+            font-size: 0.8em;
             margin-bottom: 5px;
+            color: #555;
         }
         #chatForm {
             display: flex;
@@ -67,18 +69,16 @@
             flex: 1;
             padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 20px;
-            font-size: 1em;
+            border-radius: 4px;
         }
         #sendButton {
             padding: 10px 15px;
             border: none;
-            border-radius: 20px;
-            background: #007bff;
+            border-radius: 4px;
+            background-color: #007bff;
             color: white;
             cursor: pointer;
             margin-left: 10px;
-            font-size: 1em;
         }
         #sendButton:hover {
             background: #0056b3;
@@ -90,13 +90,13 @@
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
-            background-color: #ff4d4d; /* Red color */
+            background-color: #ff4d4d; /* Red log out button */
             color: white;
             cursor: pointer;
             font-size: 0.8em;
         }
         #logoutButton:hover {
-            background-color: #ff1a1a; /* Darker red */
+            background-color: #ff1a1a;
         }
     </style>
 </head>
@@ -114,16 +114,19 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            databaseURL: "YOUR_DATABASE_URL"
+            apiKey: "YOUR_FIREBASE_API_KEY",
+            authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+            projectId: "YOUR_FIREBASE_PROJECT_ID",
+            storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+            appId: "YOUR_FIREBASE_APP_ID",
+            measurementId: "YOUR_FIREBASE_MEASUREMENT_ID",
+            databaseURL: "YOUR_FIREBASE_DATABASE_URL"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
@@ -132,11 +135,13 @@
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
 
+        // Check if user is logged in
         const username = localStorage.getItem('username');
         if (!username) {
             window.location.href = 'index.html';
         }
 
+        // Handle form submission to send message
         chatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const message = chatInput.value.trim();
@@ -151,30 +156,36 @@
             }
         });
 
+        // Function to load and display messages
+        function displayMessage(data) {
+            const messageElement = document.createElement('div');
+            const labelElement = document.createElement('div');
+            messageElement.classList.add('message');
+            labelElement.classList.add('message-label');
+
+            // Check if it's the user's message
+            if (data.username === username) {
+                messageElement.classList.add('user');
+                labelElement.textContent = "You";
+            } else {
+                messageElement.classList.add('other');
+                labelElement.textContent = data.username;
+            }
+
+            messageElement.textContent = data.message;
+            chatWindow.appendChild(labelElement);
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+        }
+
+        // Listen for new messages in real-time
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
-            const messageElement = document.createElement('div');
-            const usernameElement = document.createElement('div');
-            const textElement = document.createElement('div');
-
-            usernameElement.classList.add('username');
-            usernameElement.textContent = data.username;
-
-            textElement.classList.add('message');
-            if (data.username === username) {
-                textElement.classList.add('self');
-            } else {
-                textElement.classList.add('other');
-            }
-
-            textElement.textContent = data.message;
-            messageElement.appendChild(usernameElement);
-            messageElement.appendChild(textElement);
-            chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight; 
+            displayMessage(data);
         });
 
+        // Handle logout
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('username');
             window.location.href = 'index.html';
