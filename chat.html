@@ -65,13 +65,26 @@
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
-            background-color: #ff0000;
+            background-color: #ff4d4d;
             color: white;
             cursor: pointer;
             font-size: 0.8em;
         }
         #logoutButton:hover {
-            background-color: #0056b3;
+            background-color: #ff1a1a;
+        }
+        /* Clear Button Styling */
+        #clearButton {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #ff0000;
+            color: white;
+            cursor: pointer;
+            display: none; /* Hidden by default */
+        }
+        #clearButton:hover {
+            background-color: #cc0000;
         }
     </style>
 </head>
@@ -83,11 +96,12 @@
             <input type="text" id="chatInput" placeholder="Type a message..." required>
             <button type="submit" id="sendButton">Send</button>
         </form>
+        <button id="clearButton">Clear All Messages</button> <!-- Clear Button -->
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -98,7 +112,7 @@
             messagingSenderId: "713480199695",
             appId: "1:713480199695:web:2f1b67383611c668338d7a",
             measurementId: "G-RZFMG302N3",
-            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app" // Updated database URL
+            databaseURL: "https://warathpob-webchat-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
 
         // Initialize Firebase
@@ -109,11 +123,17 @@
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
+        const clearButton = document.getElementById('clearButton'); // Clear Button reference
 
         // Check if user is logged in
         const username = localStorage.getItem('username');
         if (!username) {
             window.location.href = 'index.html';
+        }
+
+        // Show "Clear" button if the user is "523"
+        if (username === "523") {
+            clearButton.style.display = 'block'; // Show the button only for user "523"
         }
 
         // Handle form submission to send message
@@ -159,6 +179,16 @@
 
         // Load messages when page loads
         loadMessages();
+
+        // Clear all messages (only for "523")
+        clearButton.addEventListener('click', () => {
+            const messageRef = ref(database, 'messages');
+            remove(messageRef).then(() => {
+                chatWindow.innerHTML = ''; // Clear chat window
+            }).catch((error) => {
+                console.error("Error clearing messages:", error);
+            });
+        });
 
         // Handle logout
         logoutButton.addEventListener('click', () => {
