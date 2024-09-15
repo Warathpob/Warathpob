@@ -5,7 +5,7 @@ import os
 
 # Function to notify the web server
 def notify_web_server(message):
-    url = 'http://localhost:5000/notify'
+    url = 'https://notify-api.line.me/api/notify'
     data = {'message': message}
     response = requests.post(url, data=data)
     return response.status_code

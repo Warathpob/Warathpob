@@ -153,6 +153,8 @@
         const logoutButton = document.getElementById('logoutButton');
         const clearButton = document.getElementById('clearButton');
 
+        let messageIds = new Set();  // To track displayed messages
+
         // Check if user is logged in
         const username = localStorage.getItem('username');
         if (!username) {
@@ -179,9 +181,14 @@
             const messageRef = ref(database, 'messages');
             get(messageRef).then((snapshot) => {
                 if (snapshot.exists()) {
+                    chatWindow.innerHTML = ''; // Clear the chat window before loading
                     snapshot.forEach((childSnapshot) => {
                         const data = childSnapshot.val();
-                        displayMessage(data.username, data.message);
+                        const messageId = childSnapshot.key; // Get unique message ID
+                        if (!messageIds.has(messageId)) { // Only add if not already displayed
+                            displayMessage(data.username, data.message);
+                            messageIds.add(messageId); // Mark the message as displayed
+                        }
                     });
                     chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
                 }
@@ -192,13 +199,18 @@
         const messageRef = ref(database, 'messages');
         onChildAdded(messageRef, (snapshot) => {
             const data = snapshot.val();
-            displayMessage(data.username, data.message);
-            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+            const messageId = snapshot.key;
+            if (!messageIds.has(messageId)) { // Check if the message was already added
+                displayMessage(data.username, data.message);
+                messageIds.add(messageId); // Mark the message as added
+                chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+            }
         });
 
         // Listen for message removal in real-time
         onChildRemoved(messageRef, () => {
             chatWindow.innerHTML = ''; // Clear the chat window for all users
+            messageIds.clear(); // Clear the set of message IDs
         });
 
         // Function to display a message
@@ -234,6 +246,7 @@
             const messageRef = ref(database, 'messages');
             remove(messageRef).then(() => {
                 chatWindow.innerHTML = ''; // Clear the chat window
+                messageIds.clear(); // Clear the message IDs set
             }).catch((error) => {
                 console.error("Error clearing messages: ", error);
             });
