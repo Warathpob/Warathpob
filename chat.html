@@ -99,10 +99,24 @@
         #logoutButton:hover {
             background-color: #e60000;
         }
+        #clearAllButton {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #ff5722;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        #clearAllButton:hover {
+            background-color: #e64a19;
+        }
     </style>
 </head>
 <body>
     <button id="logoutButton">Log Out</button>
+    <button id="clearAllButton">Clear All</button>
     <div class="container">
         <div id="chatWindow"></div>
         <form id="chatForm">
@@ -113,7 +127,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -135,6 +149,7 @@
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
+        const clearAllButton = document.getElementById('clearAllButton');
 
         // Check if user is logged in
         const username = localStorage.getItem('username');
@@ -205,6 +220,18 @@
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('username');
             window.location.href = 'index.html';
+        });
+
+        // Handle clear all
+        clearAllButton.addEventListener('click', () => {
+            const messageRef = ref(database, 'messages');
+            get(messageRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        remove(childSnapshot.ref);
+                    });
+                }
+            });
         });
     </script>
 </body>
