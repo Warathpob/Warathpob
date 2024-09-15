@@ -52,7 +52,7 @@
             color: #333;
         }
         .message .messageContent {
-            background: #dbdadae2;
+            background: #dbdada;
             padding: 10px;
             border-radius: 12px;
             max-width: 80%;
@@ -129,7 +129,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+        import { getDatabase, ref, push, onChildAdded, onChildRemoved, get, remove } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -194,6 +194,11 @@
             const data = snapshot.val();
             displayMessage(data.username, data.message);
             chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to bottom
+        });
+
+        // Listen for message removal in real-time
+        onChildRemoved(messageRef, () => {
+            chatWindow.innerHTML = ''; // Clear the chat window for all users
         });
 
         // Function to display a message
