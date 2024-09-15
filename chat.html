@@ -99,24 +99,26 @@
         #logoutButton:hover {
             background-color: #e60000;
         }
-        #clearAllButton {
-            margin-top: 10px;
+        #clearButton {
+            position: absolute;
+            top: 10px;
+            left: 10px;
             padding: 5px 10px;
             border: none;
             border-radius: 4px;
-            background-color: #ff5722;
+            background-color: #f57c00;
             color: white;
             cursor: pointer;
             font-size: 0.8em;
         }
-        #clearAllButton:hover {
-            background-color: #e64a19;
+        #clearButton:hover {
+            background-color: #e65100;
         }
     </style>
 </head>
 <body>
     <button id="logoutButton">Log Out</button>
-    <button id="clearAllButton">Clear All</button>
+    <button id="clearButton">Clear All</button>
     <div class="container">
         <div id="chatWindow"></div>
         <form id="chatForm">
@@ -149,7 +151,7 @@
         const chatForm = document.getElementById('chatForm');
         const chatInput = document.getElementById('chatInput');
         const logoutButton = document.getElementById('logoutButton');
-        const clearAllButton = document.getElementById('clearAllButton');
+        const clearButton = document.getElementById('clearButton');
 
         // Check if user is logged in
         const username = localStorage.getItem('username');
@@ -222,15 +224,13 @@
             window.location.href = 'index.html';
         });
 
-        // Handle clear all
-        clearAllButton.addEventListener('click', () => {
+        // Handle "Clear All" button to clear all messages
+        clearButton.addEventListener('click', () => {
             const messageRef = ref(database, 'messages');
-            get(messageRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        remove(childSnapshot.ref);
-                    });
-                }
+            remove(messageRef).then(() => {
+                chatWindow.innerHTML = ''; // Clear the chat window
+            }).catch((error) => {
+                console.error("Error clearing messages: ", error);
             });
         });
     </script>
