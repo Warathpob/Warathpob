@@ -5,73 +5,168 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f0f4f8;
+            background: linear-gradient(135deg, #A50000, #2C2C2C);
+            color: #fff;
+            font-size: 16px;
+            animation: fadeIn 1.5s ease-out;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 50px 40px;
+            width: 380px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
             text-align: center;
+            animation: slideUp 1.5s ease-out;
         }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); }
+            to { transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 25px;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
         input {
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
             border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transition: background 0.3s, transform 0.3s;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        #loginButton {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 30px;
+            background: #D32F2F;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        #loginButton:hover {
+            background: #B71C1C;
+            transform: scale(1.05);
+        }
+
+        #error {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #FFEBEE;
+            display: none;
+            animation: fadeInError 1s ease;
+        }
+
+        @keyframes fadeInError {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .error-message {
+            margin-top: 10px;
+            color: #FFEBEE;
+            font-size: 1rem;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Enter Your Name</h1>
-        <input type="text" id="username" placeholder="Enter your name" required>
+        <h1>Sign In</h1>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
         <button id="loginButton">Login</button>
-        <div id="error" style="color: red; margin-top: 10px;"></div>
+        <div id="error" class="error-message">Invalid username or password. Please try again.</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-analytics.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-        
-        // Your web app's Firebase configuration
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
         const firebaseConfig = {
-            apiKey: "AIzaSyCc7OxDVOH4U-4D1NC8UEVBRPOuu5mRMfo",
-            authDomain: "warathpob-webchat.firebaseapp.com",
-            projectId: "warathpob-webchat",
-            storageBucket: "warathpob-webchat.appspot.com",
-            messagingSenderId: "713480199695",
-            appId: "1:713480199695:web:2f1b67383611c668338d7a",
-            measurementId: "G-RZFMG302N3"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
         const analytics = getAnalytics(app);
+
+        const validUsers = {
+            "Jonathan": "Joey2545",
+            "Nainote": "Nainote5555"
+        };
+
+        let failedAttempts = localStorage.getItem('failedAttempts') ? parseInt(localStorage.getItem('failedAttempts')) : 0;
 
         document.getElementById('loginButton').addEventListener('click', () => {
             const username = document.getElementById('username').value.trim();
-            if (username) {
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error');
+
+            if (failedAttempts >= 3) {
+                window.location.href = 'bitch.html';
+                return;
+            }
+
+            if (validUsers[username] && validUsers[username] === password) {
                 localStorage.setItem('username', username);
+                localStorage.setItem('failedAttempts', 0); // reset failed attempts
                 window.location.href = 'main.html';
             } else {
-                document.getElementById('error').textContent = 'Please enter your name.';
+                failedAttempts++;
+                localStorage.setItem('failedAttempts', failedAttempts);
+                errorDiv.style.display = 'block';
             }
         });
     </script>
