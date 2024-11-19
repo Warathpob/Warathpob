@@ -156,7 +156,7 @@
         // Check if user is logged in
         const username = localStorage.getItem('username');
         if (!username) {
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
 
         // Handle form submission to send message
@@ -226,7 +226,7 @@
         // Handle logout
         logoutButton.addEventListener('click', () => {
             localStorage.removeItem('username');
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         });
 
         // Handle "Clear All" button to clear all messages

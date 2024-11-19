@@ -21,6 +21,31 @@
             width: 100%;
             max-width: 600px;
             color: white;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+            animation-delay: 0.1s;
+        }
+        h1 {
+            font-size: 2.5em;
+            animation: slideIn 2s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
         button {
             padding: 10px 20px;
@@ -30,6 +55,9 @@
             color: white;
             cursor: pointer;
             margin: 10px;
+            opacity: 0;
+            animation: fadeInButton 1s forwards;
+            animation-delay: 2s;
         }
         button:hover {
             background-color: #444;
@@ -49,14 +77,22 @@
         #logoutButton:hover {
             background-color: #000000;
         }
+        @keyframes fadeInButton {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
     <button id="logoutButton">Log Out</button>
     <div class="container">
-        <h1>Welcome to the chamber of secrets, <span id="username"></span>.</h1>
-        <button id="liveChatButton">Live Chat</button>
-        <button id="privateChatButton">Private Chat</button> <!-- New Private Chat Button -->
+        <h1>WELCOME TO THE CHAMBER OF SECRETS, <span id="username"></span>.</h1>
+        <button id="GroupChatButton">Group Chat</button>
+        <button id="privateChatButton">Private Chat</button>
     </div>
 
     <script type="module">
@@ -85,19 +121,16 @@
         if (username) {
             document.getElementById('username').textContent = username;
         } else {
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         }
 
         document.getElementById('logoutButton').addEventListener('click', () => {
             localStorage.removeItem('username');
-            window.location.href = 'index.html';
+            window.location.href = 'login.html';
         });
 
-        document.getElementById('liveChatButton').addEventListener('click', () => {
-            window.location.href = 'chat.html';
-        });
-        document.getElementById('privateChatButton').addEventListener('click', () => {
-            window.location.href = 'selectUser.html'; // Navigate to private chat selection page
+        document.getElementById('GroupChatButton').addEventListener('click', () => {
+            window.location.href = 'GroupChat.html';
         });
     </script>
 </body>
