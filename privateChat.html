@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Chat</title>
+    <style>
+        /* Styles similar to chat.html */
+    </style>
+</head>
+<body>
+    <button id="logoutButton">Log Out</button>
+    <button id="backButton">Back to Users</button>
+    <div class="container">
+        <h2>Chat with <span id="chatWithUser"></span></h2>
+        <div id="chatWindow"></div>
+        <form id="chatForm">
+            <input type="text" id="chatInput" placeholder="Type a message..." required>
+            <button type="submit" id="sendButton">Send</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+    
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+    
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+    
+        // Retrieve the selected user from localStorage
+        const chatWithUser = localStorage.getItem('chatWith');
+        if (chatWithUser) {
+            document.getElementById('chatWithUser').textContent = chatWithUser;
+        } else {
+            // If no user is selected, redirect back to the select user page
+            window.location.href = 'selectUser.html';
+        }
+    
+        const chatWindow = document.getElementById('chatWindow');
+        const chatForm = document.getElementById('chatForm');
+    
+        const privateChatRef = ref(database, `private_chats/${localStorage.getItem('username')}_${chatWithUser}`);
+    
+        chatForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = {
+                text: document.getElementById('chatInput').value,
+                sender: localStorage.getItem('username'),
+                timestamp: new Date().toISOString()
+            };
+            push(privateChatRef, message);
+            chatForm.reset();
+        });
+    
+        onChildAdded(privateChatRef, (snapshot) => {
+            const messageData = snapshot.val();
+            const messageEl = document.createElement('div');
+            messageEl.textContent = `${messageData.sender}: ${messageData.text}`;
+            chatWindow.appendChild(messageEl);
+        });
+    
+        document.getElementById('backButton').addEventListener('click', () => {
+            window.location.href = 'selectUser.html';
+        });
+    </script>
+    
