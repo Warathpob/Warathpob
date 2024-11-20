@@ -146,6 +146,7 @@
             "Jonathan": "Joey2545",
             "Nainote": "Nainote5555",
             "Liew": "040844",
+            "Mhok": "010645",
             "Yen": "523"
         };
 
@@ -164,7 +165,7 @@
             if (validUsers[username] && validUsers[username] === password) {
                 localStorage.setItem('username', username);
                 localStorage.setItem('failedAttempts', 0); // reset failed attempts
-                window.location.href = 'main.html';
+                window.location.href = 'verify.html';
             } else {
                 failedAttempts++;
                 localStorage.setItem('failedAttempts', failedAttempts);
