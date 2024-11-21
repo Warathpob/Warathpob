@@ -625,27 +625,28 @@ for (let i = 0; i < 7; i++) {
   });
 }
 // Maintain aspect ratio
-const aspectRatio = 1 / 2; // Width-to-height ratio (400x800 originally)
-
 function adjustCanvasSize() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  // Determine new canvas size while maintaining the aspect ratio
-  const newCanvasWidth = Math.min(screenWidth, screenHeight * aspectRatio);
-  const newCanvasHeight = newCanvasWidth / aspectRatio;
+  // Calculate the new canvas size while maintaining the 1:2 aspect ratio
+  let newCanvasWidth = screenWidth;
+  let newCanvasHeight = screenWidth * 2;
 
-  // Set canvas dimensions
+  if (newCanvasHeight > screenHeight) {
+    newCanvasHeight = screenHeight;
+    newCanvasWidth = screenHeight / 2;
+  }
+
+  // Set the canvas size
   canvas.width = newCanvasWidth;
   canvas.height = newCanvasHeight;
 
-  // Scale everything proportionally
-  ctx.scale(newCanvasWidth / 400, newCanvasHeight / 800); // Original dimensions were 400x800
+  // Reset and scale the drawing context to match the new canvas size
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformations
+  ctx.scale(newCanvasWidth / 400, newCanvasHeight / 800); // Scale based on original size
 }
 
-// Re-adjust canvas size when the window is resized
-window.addEventListener('resize', adjustCanvasSize);
-adjustCanvasSize(); // Call on page load
 
 cueBall.rotation = 0;
 cueBall.angularVelocity = 0;
