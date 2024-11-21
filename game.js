@@ -635,11 +635,11 @@ function adjustCanvasSize() {
 
   if (screenAspectRatio > canvasAspectRatio) {
     // Screen is wider than the canvas aspect ratio
-    newCanvasHeight = screenHeight * 0.9; // Use 90% of the screen height
+    newCanvasHeight = screenHeight * 0.85; // Use 90% of the screen height
     newCanvasWidth = newCanvasHeight * canvasAspectRatio;
   } else {
     // Screen is narrower or matches the canvas aspect ratio
-    newCanvasWidth = screenWidth * 0.9; // Use 90% of the screen width
+    newCanvasWidth = screenWidth * 0.85; // Use 90% of the screen width
     newCanvasHeight = newCanvasWidth / canvasAspectRatio;
   }
 
