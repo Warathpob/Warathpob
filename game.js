@@ -542,26 +542,41 @@ function showGameOver(message) {
     window.location.reload();
   });
 }
-// Detect start of cue stick drag
-function handleStart(e) {
+
+// Event Listeners
+// Add event listeners for both mouse and touch events
+canvas.addEventListener('mousedown', startDrag);
+canvas.addEventListener('mousemove', drag);
+canvas.addEventListener('mouseup', releaseDrag);
+
+canvas.addEventListener('touchstart', startDrag, { passive: false });
+canvas.addEventListener('touchmove', drag, { passive: false });
+canvas.addEventListener('touchend', releaseDrag, { passive: false });
+
+// Start Drag
+function startDrag(e) {
+  e.preventDefault(); // Prevent scrolling or page dragging
   if (gameOver) return;
+
   cueStick.dragging = true;
 
-  const input = getInputPosition(e);
-  cueStick.angle = Math.atan2(input.y - cueBall.y, input.x - cueBall.x);
+  const { x, y } = getMouseOrTouchPos(e);
+  cueStick.angle = Math.atan2(y - cueBall.y, x - cueBall.x);
 }
 
-// Detect cue stick drag movement
-function handleMove(e) {
+// Dragging
+function drag(e) {
+  e.preventDefault(); // Prevent scrolling or page dragging
   if (!cueStick.dragging || gameOver) return;
 
-  const input = getInputPosition(e);
-  cueStick.power = Math.min(cueStick.maxPower, Math.sqrt((input.x - cueBall.x) ** 2 + (input.y - cueBall.y) ** 2));
-  cueStick.angle = Math.atan2(input.y - cueBall.y, input.x - cueBall.x);
+  const { x, y } = getMouseOrTouchPos(e);
+  cueStick.power = Math.min(cueStick.maxPower, Math.sqrt((x - cueBall.x) ** 2 + (y - cueBall.y) ** 2));
+  cueStick.angle = Math.atan2(y - cueBall.y, x - cueBall.x);
 }
 
-// Release cue stick and apply force
-function handleEnd() {
+// Release Drag
+function releaseDrag(e) {
+  e.preventDefault(); // Prevent scrolling or page dragging
   if (cueStick.dragging && !gameOver) {
     cueBall.vx = -Math.cos(cueStick.angle) * cueStick.power * 0.15; // Opposite to stick's direction
     cueBall.vy = -Math.sin(cueStick.angle) * cueStick.power * 0.15; // Opposite to stick's direction
@@ -573,29 +588,25 @@ function handleEnd() {
     cueStick.power = 0;
   }
 }
-
-// Add event listeners for mouse and touch
-canvas.addEventListener('mousedown', handleStart);
-canvas.addEventListener('mousemove', handleMove);
-canvas.addEventListener('mouseup', handleEnd);
-
-canvas.addEventListener('touchstart', handleStart);
-canvas.addEventListener('touchmove', handleMove);
-canvas.addEventListener('touchend', handleEnd);
-function getInputPosition(e) {
-  let x, y;
+function getMouseOrTouchPos(e) {
+  const rect = canvas.getBoundingClientRect();
   if (e.touches && e.touches.length > 0) {
-    const touch = e.touches[0];
-    const rect = canvas.getBoundingClientRect();
-    x = touch.clientX - rect.left;
-    y = touch.clientY - rect.top;
+    // For touch input
+    return {
+      x: e.touches[0].clientX - rect.left,
+      y: e.touches[0].clientY - rect.top,
+    };
   } else {
-    const rect = canvas.getBoundingClientRect();
-    x = e.clientX - rect.left;
-    y = e.clientY - rect.top;
+    // For mouse input
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
   }
-  return { x, y };
 }
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+}, { passive: false });
 
 
 // Initialize balls
