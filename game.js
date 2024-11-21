@@ -624,6 +624,28 @@ for (let i = 0; i < 7; i++) {
     angularVelocity: 0, // Initial angular velocity
   });
 }
+// Maintain aspect ratio
+const aspectRatio = 1 / 2; // Width-to-height ratio (400x800 originally)
+
+function adjustCanvasSize() {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  // Determine new canvas size while maintaining the aspect ratio
+  const newCanvasWidth = Math.min(screenWidth, screenHeight * aspectRatio);
+  const newCanvasHeight = newCanvasWidth / aspectRatio;
+
+  // Set canvas dimensions
+  canvas.width = newCanvasWidth;
+  canvas.height = newCanvasHeight;
+
+  // Scale everything proportionally
+  ctx.scale(newCanvasWidth / 400, newCanvasHeight / 800); // Original dimensions were 400x800
+}
+
+// Re-adjust canvas size when the window is resized
+window.addEventListener('resize', adjustCanvasSize);
+adjustCanvasSize(); // Call on page load
 
 cueBall.rotation = 0;
 cueBall.angularVelocity = 0;
