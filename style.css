@@ -5,21 +5,13 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #2c3e50;
+  background: #333; /* Dark wood background */
   font-family: Arial, sans-serif;
   color: #ecf0f1;
 }
 
-.game-container {
-  text-align: center;
-}
-
 canvas {
-  background-color: #6b4b23;
-  border: 8px solid #bd8e41;
-  border-radius: 8px;
+  background-color: #228B22; /* Green felt color */
+  border: none; /* Remove the border */
 }
 
-.controls {
-  margin-top: 10px;
-}
