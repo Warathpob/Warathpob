@@ -4,10 +4,17 @@ const ctx = canvas.getContext('2d');
 const tableWidth = canvas.width;
 const tableHeight = canvas.height;
 
+let firstShot = true; // To track if it's the first shot
+let firstHit = null; // To track the first ball hit by the cue ball
+let shotInProgress = false; // To track if a shot is currently in progress
+
+
+
 // Ball properties
 const ballRadius = 12;
 const balls = [];
 const colors = ['#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000'];
+
 
 // Pockets
 const pocketRadius = ballRadius * 2.5;
@@ -33,7 +40,7 @@ const cueBall = {
 // Black ball
 const blackBall = { 
   x: tableWidth / 2, 
-  y: tableHeight / 3, 
+  y: tableHeight / 5 + ballRadius * 4 , 
   vx: 0, 
   vy: 0, 
   color: '#000', 
@@ -138,7 +145,7 @@ function drawCueStick() {
       stickEndY = stickStartY + Math.sin(cueStick.angle) * cueStick.stickLength;
   
       const stickWidth = 10; // Base width of the stick
-      const tipWidth = 5; // Narrow tip for realism
+      const tipWidth = 3; // Narrow tip for realism
   
       // Draw the main stick body (darker brown)
       ctx.beginPath();
@@ -372,6 +379,11 @@ function drawGuideline() {
     // Stop the ball when velocity is low
     if (Math.abs(ball.vx) < 0.05) ball.vx = 0;
     if (Math.abs(ball.vy) < 0.05) ball.vy = 0;
+      // End first shot logic if the cue ball stops moving
+  if (firstShot && shotInProgress && cueBall.vx === 0 && cueBall.vy === 0) {
+    firstShot = false; // First shot is over
+    shotInProgress = false; // Shot is no longer in progress
+  }
   
     // Update rotation based on velocity
     const speed = Math.sqrt(ball.vx ** 2 + ball.vy ** 2);
@@ -457,6 +469,16 @@ function checkCollision(ball1, ball2) {
 
     ball2.vx = Math.cos(collisionAngle) * finalVelocity2 + Math.cos(collisionAngle + Math.PI / 2) * orthogonalVelocity2;
     ball2.vy = Math.sin(collisionAngle) * finalVelocity2 + Math.sin(collisionAngle + Math.PI / 2) * orthogonalVelocity2;
+   // Check if it's the first shot and track the first hit
+    if (firstShot && shotInProgress && firstHit === null) {
+      if (ball1 === cueBall && ball2.number === 7) {
+        firstHit = 7; // Record the first ball hit
+        window.location.href = 'main.html'; // Redirect to main.html
+      } else if (ball2 === cueBall && ball1.number === 7) {
+        firstHit = 7; // Record the first ball hit
+        window.location.href = 'main.html'; // Redirect to main.html
+      }
+    }
   }
 }
 
@@ -544,6 +566,7 @@ function showGameOver(message) {
 }
 
 // Event Listeners
+
 // Add event listeners for both mouse and touch events
 canvas.addEventListener('mousedown', startDrag);
 canvas.addEventListener('mousemove', drag);
@@ -552,6 +575,7 @@ canvas.addEventListener('mouseup', releaseDrag);
 canvas.addEventListener('touchstart', startDrag, { passive: false });
 canvas.addEventListener('touchmove', drag, { passive: false });
 canvas.addEventListener('touchend', releaseDrag, { passive: false });
+
 
 // Start Drag
 function startDrag(e) {
@@ -586,6 +610,10 @@ function releaseDrag(e) {
     cueStick.returning = true;
     cueStick.returnSpeed = cueStick.power; // Initial return offset
     cueStick.power = 0;
+        // Set shotInProgress flag and mark the first shot
+        if (firstShot) {
+          shotInProgress = true; // Mark that the first shot is in progress
+        }
   }
 }
 function getMouseOrTouchPos(e) {
@@ -610,20 +638,46 @@ canvas.addEventListener('touchmove', (e) => {
 
 
 // Initialize balls
-// Initialize balls
-for (let i = 0; i < 7; i++) {
+// Initialize balls with a triangular setup (15 balls)
+const ballPositions = [
+  { x: tableWidth / 2, y: tableHeight / 3.2 }, // Top of the triangle (1st row)
+  { x: tableWidth / 2 - ballRadius, y: tableHeight / 3.9 + ballRadius * 2 }, // 2nd row (left)
+  { x: tableWidth / 2 + ballRadius, y: tableHeight / 3.9 + ballRadius * 2 }, // 2nd row (right)
+  { x: tableWidth / 2 - ballRadius * 2, y: tableHeight / 5 + ballRadius * 4 }, // 3rd row (leftmost)
+  { x: tableWidth / 2 + ballRadius * 4, y: tableHeight / 11.6 + ballRadius * 8 }, // 3rd row (center)
+  { x: tableWidth / 2 + ballRadius * 2, y: tableHeight / 5 + ballRadius * 4 }, // 3rd row (rightmost)
+  { x: tableWidth / 2 - ballRadius * 3, y: tableHeight / 7 + ballRadius * 6 }, // 4th row (leftmost)
+  { x: tableWidth / 2 - ballRadius, y: tableHeight / 7 + ballRadius * 6 }, // 4th row (left center)
+  { x: tableWidth / 2 + ballRadius, y: tableHeight / 7 + ballRadius * 6 }, // 4th row (right center)
+  { x: tableWidth / 2 + ballRadius * 3, y: tableHeight / 7 + ballRadius * 6 }, // 4th row (rightmost)
+  { x: tableWidth / 2 - ballRadius * 4, y: tableHeight / 11.6 + ballRadius * 8 }, // 5th row (leftmost)
+  { x: tableWidth / 2 - ballRadius * 2, y: tableHeight / 11.6 + ballRadius * 8 }, // 5th row (left center-left)
+  { x: tableWidth / 2, y: tableHeight / 11.6 + ballRadius * 8 }, // 5th row (center)
+  { x: tableWidth / 2 + ballRadius * 2, y: tableHeight / 11.6 + ballRadius * 8 }, // 5th row (right center-right)
+   // 5th row (rightmost)
+];
+
+// Ball numbers in order
+const ballNumbers = [1, 3, 14, 13, 12, 18, 4, 10, 17, 5, 2, 7, 9, 6]; // Including black ball (8)
+
+// Initialize the balls
+for (let i = 0; i < ballPositions.length; i++) {
   balls.push({
-    x: tableWidth / 2 + Math.random() * 100 - 50,
-    y: tableHeight / 2 + Math.random() * 100 - 50,
+    x: ballPositions[i].x,
+    y: ballPositions[i].y,
     vx: 0,
     vy: 0,
-    color: colors[i % colors.length],
-    number: i + 1, // Assign unique numbers (1–7)
+    color: '#A50000', // Black for ball 8, red for others
+    number: ballNumbers[i], // Assign specific numbers
     pocketed: false,
     rotation: 0, // Initial rotation angle
     angularVelocity: 0, // Initial angular velocity
   });
 }
+
+
+
+
 function adjustCanvasSize() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
@@ -649,6 +703,7 @@ function adjustCanvasSize() {
   // Rescale the drawing context to match the new canvas size
   ctx.setTransform(newCanvasWidth / 400, 0, 0, newCanvasHeight / 800, 0, 0); // Scale to original canvas size
 }
+
 
 // Call adjustCanvasSize on load and resize
 window.addEventListener('resize', adjustCanvasSize);
