@@ -624,29 +624,35 @@ for (let i = 0; i < 7; i++) {
     angularVelocity: 0, // Initial angular velocity
   });
 }
-// Maintain aspect ratio
 function adjustCanvasSize() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  // Calculate the new canvas size while maintaining the 1:2 aspect ratio
-  let newCanvasWidth = screenWidth;
-  let newCanvasHeight = screenWidth * 2;
+  const canvasAspectRatio = 1 / 2; // Aspect ratio for the pool table (400:800)
+  const screenAspectRatio = screenWidth / screenHeight;
 
-  if (newCanvasHeight > screenHeight) {
-    newCanvasHeight = screenHeight;
-    newCanvasWidth = screenHeight / 2;
+  let newCanvasWidth, newCanvasHeight;
+
+  if (screenAspectRatio > canvasAspectRatio) {
+    // Screen is wider than the canvas aspect ratio
+    newCanvasHeight = screenHeight * 0.9; // Use 90% of the screen height
+    newCanvasWidth = newCanvasHeight * canvasAspectRatio;
+  } else {
+    // Screen is narrower or matches the canvas aspect ratio
+    newCanvasWidth = screenWidth * 0.9; // Use 90% of the screen width
+    newCanvasHeight = newCanvasWidth / canvasAspectRatio;
   }
 
-  // Set the canvas size
   canvas.width = newCanvasWidth;
   canvas.height = newCanvasHeight;
 
-  // Reset and scale the drawing context to match the new canvas size
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transformations
-  ctx.scale(newCanvasWidth / 400, newCanvasHeight / 800); // Scale based on original size
+  // Rescale the drawing context to match the new canvas size
+  ctx.setTransform(newCanvasWidth / 400, 0, 0, newCanvasHeight / 800, 0, 0); // Scale to original canvas size
 }
 
+// Call adjustCanvasSize on load and resize
+window.addEventListener('resize', adjustCanvasSize);
+adjustCanvasSize();
 
 cueBall.rotation = 0;
 cueBall.angularVelocity = 0;
