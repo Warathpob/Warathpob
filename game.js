@@ -13,24 +13,24 @@ let shotInProgress = false; // To track if a shot is currently in progress
 // Ball properties
 const ballRadius = 12;
 const balls = [];
-const colors = ['#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000'];
+const colors = ['#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000', '#A50000'];
 
 
 // Pockets
 const pocketRadius = ballRadius * 2.5;
 const pockets = [
-  { x: 0, y: 0 },
-  { x: 0, y: tableHeight /2 },
-  { x: tableWidth, y: 0 },
-  { x: 0, y: tableHeight },
-  { x: tableWidth , y: tableHeight /2},
-  { x: tableWidth, y: tableHeight},
+  { x: 25, y: 25 },
+  { x: 25, y: tableHeight /2 },
+  { x: tableWidth-25, y: 25 },
+  { x: 25, y: tableHeight-25 },
+  { x: tableWidth-25 , y: tableHeight /2},
+  { x: tableWidth-25, y: tableHeight-25},
 ];
 
 // Cue ball
 const cueBall = { 
   x: tableWidth / 2, 
-  y: tableHeight / 1.5, 
+  y: tableHeight / 1.4, 
   vx: 0, 
   vy: 0, 
   color: '#fff', 
@@ -61,11 +61,28 @@ let cueStick = {
 };
 
 // Physics
-const friction = 0.99;
+const friction = 0.985;
 const subSteps = 4;
 
 // Game state
 let gameOver = false;
+
+// Add a fade-out animation before redirecting
+function animateRedirect() {
+  let opacity = 1; // Start with full opacity
+  const fadeInterval = setInterval(() => {
+    opacity -= 0.05; // Reduce opacity gradually
+    canvas.style.opacity = opacity; // Apply opacity to the canvas
+    if (opacity <= 0) {
+      clearInterval(fadeInterval);
+      window.location.href = "main.html"; // Redirect to main.html
+    }
+  }, 50); // Run the interval every 50ms
+}
+
+function areAllBallsStopped() {
+  return [cueBall, blackBall, ...balls].every(ball => Math.abs(ball.vx) < 0.05 && Math.abs(ball.vy) < 0.05);
+}
 
 // Utility Functions
 function drawBall(ball) {
@@ -99,14 +116,14 @@ function drawBall(ball) {
   } else if (ball === blackBall) {
     // Draw "8" for the black ball
     ctx.fillStyle = '#fff';
-    ctx.font = `${ballRadius}px Arial`;
+    ctx.font = `${ballRadius}px Segoe UI`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('8', 0, 0);
   } else {
     // Draw numbers for other balls
     ctx.fillStyle = '#fff';
-    ctx.font = `${ballRadius}px Arial`;
+    ctx.font = `${ballRadius}px Segoe UI`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(ball.number, 0, 0);
@@ -119,16 +136,32 @@ function drawBall(ball) {
 
 
 function drawPockets() {
-  pockets.forEach((pocket) => {
+  const pocketSizes = [
+    pocketRadius *0.8,        // Left-top pocket
+    pocketRadius * 0.8,  // Left-middle pocket (larger)
+    pocketRadius*0.8,        // Right-top pocket
+    pocketRadius*0.8,        // Left-bottom pocket
+    pocketRadius * 0.8,  // Right-middle pocket (larger)
+    pocketRadius*0.8         // Right-bottom pocket
+  ];
+
+  pockets.forEach((pocket, index) => {
+    ctx.save(); // Save the current state of the canvas
+
+    // Draw a circular pocket with a specific size
     ctx.beginPath();
-    ctx.arc(pocket.x, pocket.y, pocketRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#000'; // Black color for pockets
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 15; // Glow effect around pockets
+    ctx.arc(pocket.x, pocket.y, pocketSizes[index], 0, Math.PI * 2); // Full circle
+    ctx.fillStyle = '#000'; // Black pocket color
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'; // Shadow effect
+    ctx.shadowBlur = 50; // Blur for the shadow
     ctx.fill();
     ctx.closePath();
+
+    ctx.restore(); // Restore the canvas state to avoid affecting other drawings
   });
 }
+
+
 
 
 function drawCueStick() {
@@ -274,16 +307,40 @@ function drawGuideline() {
   }
   
   function drawTableBorder() {
-    const borderWidth = 30; // Border thickness
-    const cornerRadius = 30; // Border corner radius
+    const borderWidth = 25; // Thickness of the brown border
+
+    const shadowBlur = 20; // Blur effect for the inner shadow
+    const shadowColor = 'rgba(0, 0, 0, 0.6)'; // Dark shadow color
   
-    ctx.fillStyle = '#8B4513'; // Brown border color
+    // Draw the brown border
+    ctx.fillStyle = '#8B4513'; // Brown color for the border
     ctx.fillRect(0, 0, tableWidth, tableHeight);
   
-    // Draw the green playing surface
+    // Add inner shadow effect to the green surface
+    ctx.save();
     ctx.fillStyle = '#228B22'; // Green felt color
-    ctx.fillRect(borderWidth, borderWidth, tableWidth - 2 * borderWidth, tableHeight - 2 * borderWidth);
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = shadowBlur;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  
+    // Create the green surface with inner shadow
+    ctx.beginPath();
+    ctx.rect(borderWidth, borderWidth, tableWidth - 2 * borderWidth, tableHeight - 2 * borderWidth);
+    ctx.fill();
+    ctx.restore();
+  
+    // Add subtle highlight to the inner edge of the brown border for depth
+    const highlightColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.strokeStyle = highlightColor;
+    ctx.lineWidth = 2;
+  
+    ctx.beginPath();
+    ctx.rect(borderWidth, borderWidth, tableWidth - 2 * borderWidth, tableHeight - 2 * borderWidth);
+    ctx.stroke();
+    ctx.closePath();
   }
+  
   
   
  function getFirstCollision(cueBall, angle) {
@@ -379,11 +436,13 @@ function drawGuideline() {
     // Stop the ball when velocity is low
     if (Math.abs(ball.vx) < 0.05) ball.vx = 0;
     if (Math.abs(ball.vy) < 0.05) ball.vy = 0;
-      // End first shot logic if the cue ball stops moving
-  if (firstShot && shotInProgress && cueBall.vx === 0 && cueBall.vy === 0) {
-    firstShot = false; // First shot is over
-    shotInProgress = false; // Shot is no longer in progress
-  }
+  // End first shot logic if all balls have stopped
+  if (firstShot && shotInProgress && areAllBallsStopped()) {
+    shotInProgress = false;
+    firstShot = false;
+
+    if (firstHit === 7) {
+      animateRedirect();}} // Redirect if "7" was hit first
   
     // Update rotation based on velocity
     const speed = Math.sqrt(ball.vx ** 2 + ball.vy ** 2);
@@ -391,14 +450,15 @@ function drawGuideline() {
     ball.rotation += ball.angularVelocity * deltaTime; // Update rotation angle
     ball.rotation %= Math.PI * 2; // Keep angle within 0 to 2π
   
+    const borderWidth = 25;
     // Check for collisions with walls
-    if (ball.x - ballRadius < 0 || ball.x + ballRadius > tableWidth) {
+    if (ball.x - ballRadius < borderWidth || ball.x + ballRadius > tableWidth- borderWidth) {
       ball.vx *= -1;
-      ball.x = Math.max(ballRadius, Math.min(ball.x, tableWidth - ballRadius));
+      ball.x = Math.max(borderWidth +ballRadius, Math.min(ball.x, tableWidth- borderWidth - ballRadius));
     }
-    if (ball.y - ballRadius < 0 || ball.y + ballRadius > tableHeight) {
+    if (ball.y - ballRadius < borderWidth || ball.y + ballRadius > tableHeight-borderWidth) {
       ball.vy *= -1;
-      ball.y = Math.max(ballRadius, Math.min(ball.y, tableHeight - ballRadius));
+      ball.y = Math.max(borderWidth+ballRadius, Math.min(ball.y, tableHeight -borderWidth- ballRadius));
     }
   
     // Check for pocketing
@@ -413,15 +473,15 @@ function drawGuideline() {
         ball.angularVelocity = 0;
   
         if (ball === cueBall) {
-          showGameOver('Game Over! The cue ball was pocketed.');
+          showGameOver('Game Over!');
           gameOver = true;
         } else if (ball === blackBall) {
           const remainingBalls = balls.filter((b) => !b.pocketed).length;
           if (remainingBalls > 0) {
-            showGameOver('Game Over! The black ball was pocketed too early.');
+            showGameOver('Game Over!');
             gameOver = true;
           } else {
-            showGameOver('You Win! The black ball was pocketed last.');
+            showGameOver('You Win!');
             gameOver = true;
           }
         }
@@ -469,14 +529,14 @@ function checkCollision(ball1, ball2) {
 
     ball2.vx = Math.cos(collisionAngle) * finalVelocity2 + Math.cos(collisionAngle + Math.PI / 2) * orthogonalVelocity2;
     ball2.vy = Math.sin(collisionAngle) * finalVelocity2 + Math.sin(collisionAngle + Math.PI / 2) * orthogonalVelocity2;
-   // Check if it's the first shot and track the first hit
+    // Track the first hit during the first shot
     if (firstShot && shotInProgress && firstHit === null) {
       if (ball1 === cueBall && ball2.number === 7) {
-        firstHit = 7; // Record the first ball hit
-        window.location.href = 'main.html'; // Redirect to main.html
+        firstHit = 7; // The "7" ball was hit first
       } else if (ball2 === cueBall && ball1.number === 7) {
-        firstHit = 7; // Record the first ball hit
-        window.location.href = 'main.html'; // Redirect to main.html
+        firstHit = 7; // The "7" ball was hit first
+      } else {
+        firstHit = "other"; // Any other ball was hit first
       }
     }
   }
@@ -534,7 +594,10 @@ function update(deltaTime) {
       balls.slice(i + 1).forEach((ball2) => checkCollision(ball1, ball2));
     });
   }
-
+  // Allow shooting again if all balls are stopped
+  if (areAllBallsStopped() && !cueStick.dragging) {
+    cueStick.dragging = false; // Ensure the cue stick is ready
+  }
   draw();
   requestAnimationFrame(() => update(deltaTime));
 }
@@ -546,17 +609,17 @@ function showGameOver(message) {
   ctx.fillRect(0, 0, tableWidth, tableHeight);
 
   ctx.fillStyle = '#fff';
-  ctx.font = '36px Arial';
+  ctx.font = '36px Segoe UI';
   ctx.textAlign = 'center';
   ctx.fillText(message, tableWidth / 2, tableHeight / 2 - 20);
 
   const restartButton = document.createElement('button');
   restartButton.textContent = 'Restart';
   restartButton.style.position = 'absolute';
-  restartButton.style.left = `${canvas.offsetLeft + tableWidth / 2 - 50}px`;
+  restartButton.style.left = `${canvas.offsetLeft + tableWidth / 2 - 40}px`;
   restartButton.style.top = `${canvas.offsetTop + tableHeight / 2 + 20}px`;
   restartButton.style.padding = '10px 20px';
-  restartButton.style.fontSize = '16px';
+  restartButton.style.fontSize = '20px';
   restartButton.style.cursor = 'pointer';
   document.body.appendChild(restartButton);
 
@@ -580,7 +643,7 @@ canvas.addEventListener('touchend', releaseDrag, { passive: false });
 // Start Drag
 function startDrag(e) {
   e.preventDefault(); // Prevent scrolling or page dragging
-  if (gameOver) return;
+  if (gameOver || !areAllBallsStopped()) return;
 
   cueStick.dragging = true;
 
