@@ -616,7 +616,7 @@ function showGameOver(message) {
   const restartButton = document.createElement('button');
   restartButton.textContent = 'Restart';
   restartButton.style.position = 'absolute';
-  restartButton.style.left = `${canvas.offsetLeft + tableWidth / 2 - 40}px`;
+  restartButton.style.left = `${canvas.offsetLeft + tableWidth / 2 - 80}px`;
   restartButton.style.top = `${canvas.offsetTop + tableHeight / 2 + 20}px`;
   restartButton.style.padding = '10px 20px';
   restartButton.style.fontSize = '20px';
