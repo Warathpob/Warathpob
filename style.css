@@ -8,7 +8,7 @@ body {
   width: 100vw;
   overflow: hidden; /* Prevent scrolling on mobile */
   background: linear-gradient(135deg, #D80A0A, #202020);
-  font-family: 'Segoe UI';
+  font-family: Arial, sans-serif;
 }
 
 canvas {
@@ -16,16 +16,8 @@ canvas {
   display: block;
   max-width: 90%;
   max-height: 90%;
+  background-color: #ffae00;
+  border: 2px solid #000000;
+  border-radius: 20px;
   box-shadow: 0px 5px 100px rgba(0, 0, 0, 0.5);
-}
-#instruction {
-  position: absolute;
-  top: 90%;
-  left: 39.5%;
-
-  color: white; /* Make the text white */
-  font-size: 1rem; /* Adjust size to your preference */
-  font-family:  'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Consistent with your font */
-  text-align: center;
-
 }
